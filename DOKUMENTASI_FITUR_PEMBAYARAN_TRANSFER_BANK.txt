@@ -1,0 +1,435 @@
+================================================================================
+DOKUMENTASI LENGKAP: FITUR PEMBAYARAN TRANSFER BANK MANUAL
+Fitur Keamanan & Verifikasi Pembayaran untuk Website Kuliner Kampus
+================================================================================
+
+RINGKASAN IMPLEMENTASI:
+Fitur pembayaran transfer bank manual telah diintegrasikan sepenuhnya ke dalam
+sistem CodeIgniter 4 Anda dengan keamanan tingkat enterprise. Fitur ini
+memungkinkan pelanggan mengunggah bukti transfer dan merchant memverifikasi
+pembayaran dengan aman.
+
+================================================================================
+1. MODIFIKASI DATABASE
+================================================================================
+
+FILE: database/migration_add_bukti_pembayaran.sql
+
+Jalankan SQL script berikut di database Anda:
+
+    ALTER TABLE pesanan 
+    ADD COLUMN bukti_pembayaran VARCHAR(255) DEFAULT NULL 
+    AFTER metode_pembayaran;
+
+Catatan:
+- Kolom bukti_pembayaran menyimpan nama file terenkripsi (contoh: 1719328947_abc123def456.jpg)
+- Tipe data VARCHAR(255) cukup untuk nama file yang dienkripsi
+- Kolom nullable karena tidak semua metode pembayaran memerlukan bukti
+- Status pesanan akan menggunakan nilai: 'Menunggu Konfirmasi', 'Menunggu Verifikasi', 
+  'Sudah Dibayar', 'Pembayaran Ditolak'
+
+================================================================================
+2. FILE-FILE BARU YANG DITAMBAHKAN
+================================================================================
+
+A. Views (Frontend)
+   ├─ app/Views/v_detail_pesanan.php
+   │  └─ Halaman detail pesanan / sukses order dengan:
+   │     • Informasi pemesan dan detail menu
+   │     • Tampilan rekening bank untuk transfer
+   │     • Form upload bukti pembayaran dengan validasi frontend
+   │     • Preview gambar sebelum upload
+   │     • Status pembayaran yang dinamis
+   │
+   └─ app/Views/v_dashboard_merchant_pesanan.php
+      └─ Dashboard merchant untuk verifikasi pembayaran:
+         • Daftar semua pesanan dengan status pembayaran
+         • Filter berdasarkan status (Semua, Menunggu Verifikasi, Sudah Dibayar, Ditolak)
+         • Modal untuk melihat bukti pembayaran
+         • Tombol Setujui & Tolak dengan konfirmasi
+
+B. Database
+   └─ database/migration_add_bukti_pembayaran.sql
+      └─ Script ALTER TABLE untuk menambah kolom bukti_pembayaran
+
+C. Directory
+   └─ public/uploads/bukti_bayar/
+      └─ Direktori untuk menyimpan file bukti pembayaran (sudah dibuat)
+
+================================================================================
+3. PERUBAHAN PADA FILE YANG ADA
+================================================================================
+
+A. app/Models/PesananModel.php
+   Perubahan:
+   - Tambah 'bukti_pembayaran' ke dalam array $allowedFields
+   
+   Alasan: Model memerlukan izin eksplisit untuk update kolom baru
+
+B. app/Controllers/Pesanan.php
+   Method Baru Ditambahkan:
+   1. detail($pesanan_id)
+      ├─ Menampilkan halaman v_detail_pesanan
+      ├─ Proteksi: validasi login dan ownership pesanan
+      └─ Diakses via: GET /pesanan/detail/[id_pesanan]
+
+   2. uploadBukti($pesanan_id)
+      ├─ Menangani upload file bukti pembayaran
+      ├─ Validasi Keamanan 7 Layer:
+      │  1. Cek login user
+      │  2. Validasi eksistensi pesanan
+      │  3. Validasi ownership pesanan (user hanya bisa upload bukti miliknya)
+      │  4. Validasi file upload (tidak ada error)
+      │  5. Validasi tipe file (hanya PNG, JPG, JPEG)
+      │  6. Validasi ukuran (maksimal 2MB)
+      │  7. Enkripsi nama file dengan getRandomName()
+      ├─ Update database: simpan nama file & ubah status ke 'Menunggu Verifikasi'
+      ├─ Response: JSON dengan status success/error
+      └─ Diakses via: POST /pesanan/uploadBukti/[id_pesanan]
+
+   3. approvePayment($pesanan_id)
+      ├─ Merchant menyetujui pembayaran
+      ├─ Validasi: hanya merchant yang login
+      ├─ Update status pesanan menjadi 'Sudah Dibayar'
+      ├─ Response: JSON
+      └─ Diakses via: POST /pesanan/approvePayment/[id_pesanan]
+
+   4. rejectPayment($pesanan_id)
+      ├─ Merchant menolak pembayaran (bukti tidak valid)
+      ├─ Validasi: hanya merchant yang login
+      ├─ Update status pesanan menjadi 'Pembayaran Ditolak'
+      ├─ Pelanggan dapat mengunggah ulang bukti
+      ├─ Response: JSON
+      └─ Diakses via: POST /pesanan/rejectPayment/[id_pesanan]
+
+   5. dashboardMerchant()
+      ├─ Menampilkan halaman v_dashboard_merchant_pesanan
+      ├─ Proteksi: hanya merchant yang bisa akses
+      ├─ Data: semua pesanan dengan metode 'Transfer Bank'
+      ├─ Hitung: jumlah pesanan dengan status 'Menunggu Verifikasi'
+      └─ Diakses via: GET /pesanan/dashboardMerchant
+
+C. app/Config/Routes.php
+   Route Baru Ditambahkan:
+   - GET  /pesanan/detail/(:num)              → Pesanan::detail
+   - POST /pesanan/uploadBukti/(:num)         → Pesanan::uploadBukti
+   - POST /pesanan/approvePayment/(:num)      → Pesanan::approvePayment
+   - POST /pesanan/rejectPayment/(:num)       → Pesanan::rejectPayment
+   - GET  /pesanan/dashboardMerchant          → Pesanan::dashboardMerchant
+
+================================================================================
+4. ALUR PENGGUNAAN FITUR
+================================================================================
+
+SKENARIO 1: PELANGGAN UPLOAD BUKTI PEMBAYARAN
+───────────────────────────────────────────────
+1. Pelanggan membuat order melalui halaman order/pemesanan
+2. Sistem menyimpan pesanan dengan status 'Menunggu Konfirmasi'
+3. Pelanggan diarahkan ke: /pesanan/detail/[id_pesanan]
+4. Di halaman detail, jika metode pembayaran = 'Transfer Bank':
+   - Tampilkan info rekening bank (BRI 3406 0100 3344 503)
+   - Tampilkan total tagihan
+   - Sediakan form upload bukti dengan:
+     ✓ Input file dengan accept="image/*"
+     ✓ Validasi frontend: hanya image, max 2MB
+     ✓ Preview gambar sebelum submit
+     ✓ Loading spinner saat upload
+5. Pelanggan klik "Upload Bukti Pembayaran"
+6. Form dikirim via FETCH API ke: POST /pesanan/uploadBukti/[id_pesanan]
+7. Backend melakukan:
+   ✓ Validasi 7 layer keamanan (lihat bagian 3.B.2)
+   ✓ Enkripsi nama file dengan getRandomName()
+   ✓ Simpan file ke: public/uploads/bukti_bayar/[namaFileAcak].jpg
+   ✓ Update database:
+     - bukti_pembayaran = nama file acak
+     - status_pesanan = 'Menunggu Verifikasi'
+8. Halaman reload otomatis
+9. Status berubah menjadi "Menunggu Verifikasi" dengan badge kuning/orange
+
+SKENARIO 2: MERCHANT VERIFIKASI PEMBAYARAN
+────────────────────────────────────────────
+1. Merchant login ke dashboard: /pesanan/dashboardMerchant
+2. Halaman menampilkan daftar semua pesanan dengan metode 'Transfer Bank'
+3. Pesanan dengan status 'Menunggu Verifikasi' ditampilkan dengan badge kuning
+4. Badge counter menunjukkan jumlah pesanan pending (contoh: "⏳ Menunggu Verifikasi (3)")
+5. Merchant bisa filter berdasarkan status
+6. Untuk pesanan dengan status 'Menunggu Verifikasi':
+   ✓ Tombol "Lihat Bukti" tersedia
+   ✓ Tombol "Setujui" tersedia
+   ✓ Tombol "Tolak" tersedia
+7. Merchant klik "Lihat Bukti":
+   - Modal pop-up terbuka
+   - Tampilkan gambar bukti pembayaran dari file di public/uploads/bukti_bayar/
+   - Tampilkan info: nama pemesan, total tagihan, tanggal upload
+   - Tombol "Setujui" dan "Tolak" tersedia di dalam modal
+8. Merchant klik "Setujui":
+   - Konfirmasi dialog: "Apakah Anda yakin ingin menyetujui pembayaran ini?"
+   - Kirim POST ke: /pesanan/approvePayment/[id_pesanan]
+   - Backend update: status_pesanan = 'Sudah Dibayar'
+   - Alert sukses tampil
+   - Halaman reload
+   - Status berubah menjadi "Sudah Dibayar" dengan badge hijau
+   - Tombol aksi hilang dari row tersebut
+9. ATAU Merchant klik "Tolak":
+   - Konfirmasi dialog dengan pesan: "Apakah Anda yakin ingin menolak pembayaran ini? 
+     Pelanggan dapat mengunggah ulang bukti."
+   - Kirim POST ke: /pesanan/rejectPayment/[id_pesanan]
+   - Backend update: status_pesanan = 'Pembayaran Ditolak'
+   - Alert sukses tampil
+   - Halaman reload
+   - Status berubah menjadi "Pembayaran Ditolak" dengan badge merah
+   - Tombol aksi berubah menjadi pesan: "❌ Ditolak - Menunggu re-upload"
+
+SKENARIO 3: PELANGGAN RE-UPLOAD BUKTI (Jika Ditolak)
+──────────────────────────────────────────────────────
+1. Pelanggan melihat pesanannya di /pesanan/detail/[id_pesanan]
+2. Status menunjukkan: "Pembayaran Ditolak"
+3. Alert merah tampil: "❌ Pembayaran Ditolak! Silakan upload ulang bukti pembayaran 
+   yang valid."
+4. Form upload bukti masih tersedia
+5. Pelanggan upload bukti yang benar
+6. Status kembali menjadi "Menunggu Verifikasi"
+7. Merchant verifikasi ulang
+
+================================================================================
+5. FITUR KEAMANAN
+================================================================================
+
+A. VALIDASI BACKEND (7 Layer Security)
+   1. Session Validation
+      - User harus login sebelum upload
+      - Cek token CSRF
+   
+   2. Resource Ownership
+      - Hanya user pemilik pesanan yang bisa upload bukti
+      - Prevent unauthorized access ke pesanan orang lain
+   
+   3. File Upload Validation
+      - Cek UPLOAD_ERR_OK (tidak ada error upload)
+      - Cek eksistensi file
+   
+   4. MIME Type Validation
+      - Hanya PNG, JPG, JPEG diizinkan
+      - Prevent upload executable files
+   
+   5. File Size Validation
+      - Maksimal 2MB (2097152 bytes)
+      - Prevent storage abuse
+   
+   6. Filename Encryption
+      - Gunakan getRandomName() untuk generate nama acak
+      - Prevent direct access ke file via predictable path
+      - Prevent filename enumeration attacks
+   
+   7. Secure Storage
+      - Simpan di: public/uploads/bukti_bayar/
+      - File permissions: 0755 (readable tapi tidak executable)
+      - Nama file terenkripsi (tidak ada info user/order di filename)
+
+B. VALIDASI FRONTEND
+   1. Required Field
+      - Input file wajib diisi sebelum submit
+   
+   2. File Type Constraint
+      - accept="image/*" pada input tag
+      - Prevent selection of non-image files
+   
+   3. File Size Check
+      - Validasi ukuran sebelum upload
+      - Alert jika file > 2MB
+      - Prevent bandwidth waste
+   
+   4. Preview Sebelum Upload
+      - Tampilkan preview gambar
+      - User bisa verifikasi sebelum submit
+      - Tingkatkan UX dan reduce failed uploads
+   
+   5. Loading State
+      - Disable submit button saat uploading
+      - Tampilkan loading spinner
+      - Prevent double-submission
+
+C. PROTEKSI DATABASE
+   1. Parameterized Queries
+      - Model CodeIgniter 4 menggunakan prepared statements
+      - Prevent SQL injection
+   
+   2. Input Sanitization
+      - Gunakan esc() di View untuk HTML escape
+      - Prevent XSS attacks
+   
+   3. Role-Based Access Control
+      - Hanya merchant bisa approve/reject
+      - Validasi role di setiap method
+      - Prevent privilege escalation
+
+================================================================================
+6. INFORMASI REKENING BANK (Hardcoded di View)
+================================================================================
+
+Bank             : BRI
+No. Rekening     : 3406 0100 3344 503
+Atas Nama        : Merchant Kuliner Semarang
+
+CATATAN: Untuk membuat ini dinamis (dari database), bisa diubah di kemudian hari.
+         Informasi ini ditampilkan di: app/Views/v_detail_pesanan.php (line 300-330)
+
+================================================================================
+7. STATUS PESANAN & WARNA BADGE
+================================================================================
+
+Status Pesanan              Badge Color    Bootstrap Class
+─────────────────────────────────────────────────────────────────
+Menunggu Konfirmasi         Biru Light     cfe2ff / 084298
+Menunggu Verifikasi         Kuning/Orange  fff3cd / 856404
+Sudah Dibayar               Hijau          d1e7dd / 0a3622
+Pembayaran Ditolak          Merah          f8d7da / 842029
+
+CUSTOM COLORS (defined in CSS):
+.status-pending-confirmation  → #cfe2ff (biru)
+.status-pending-verification  → #fff3cd (kuning)
+.status-paid                  → #d1e7dd (hijau)
+.status-rejected              → #f8d7da (merah)
+
+================================================================================
+8. TESTING CHECKLIST
+================================================================================
+
+Sebelum deploy, pastikan test skenario berikut:
+
+CUSTOMER FLOW:
+☐ Login sebagai customer
+☐ Buat pesanan dengan metode "Transfer Bank"
+☐ Akses halaman /pesanan/detail/[id] → harus tampil form upload
+☐ Lihat informasi rekening bank BRI
+☐ Upload file gambar valid (PNG/JPG, < 2MB)
+☐ Verifikasi file tersimpan di public/uploads/bukti_bayar/
+☐ Verifikasi nama file terenkripsi (random, bukan nama asli)
+☐ Verifikasi database: bukti_pembayaran terisi, status = 'Menunggu Verifikasi'
+☐ Verifikasi halaman reload dengan status badge kuning
+☐ Coba upload file invalid:
+   ✓ File > 2MB → should show error message
+   ✓ File non-image (PDF, ZIP) → should be blocked
+   ✓ Coba upload ke pesanan orang lain → should be forbidden (403)
+
+MERCHANT FLOW:
+☐ Login sebagai merchant
+☐ Akses /pesanan/dashboardMerchant → harus tampil daftar pesanan
+☐ Lihat counter pesanan "Menunggu Verifikasi"
+☐ Filter berdasarkan status → verify setiap filter bekerja
+☐ Klik tombol "Lihat Bukti" → modal terbuka dengan gambar & info
+☐ Klik tombol "Setujui" → status jadi "Sudah Dibayar" ✅
+☐ Klik tombol "Tolak" → status jadi "Pembayaran Ditolak" ❌
+☐ Re-upload bukti sebagai customer → harus bisa upload ulang
+
+SECURITY TESTING:
+☐ Coba bypass frontend validation (upload invalid file via DevTools)
+   → Backend harus reject dengan error message
+☐ Coba upload ke pesanan user lain (ubah parameter)
+   → Should be forbidden (ownership check)
+☐ Coba akses sebagai non-merchant ke approve/reject
+   → Should be forbidden (role check)
+☐ Verifikasi file tidak bisa di-download langsung:
+   ✓ Akses /uploads/bukti_bayar/[namafile].jpg langsung
+   ✓ Harus melalui controller validation
+
+================================================================================
+9. TROUBLESHOOTING & FAQ
+================================================================================
+
+Q1: File tidak tersimpan ke public/uploads/bukti_bayar/
+A:  - Pastikan direktori sudah dibuat: public/uploads/bukti_bayar/
+    - Cek permission direktori: chmod 755
+    - Cek error log di writable/logs/
+
+Q2: Preview gambar tidak tampil di modal
+A:  - Verifikasi path file di modal: /uploads/bukti_bayar/[filename]
+    - Cek apakah file benar-benar tersimpan
+    - Cek console browser untuk JS errors
+
+Q3: Form upload tidak merespons
+A:  - Verifikasi route POST /pesanan/uploadBukti/[id] ada
+    - Cek apakah CSRF token dikirim (gunakan <?= csrf_field() ?>)
+    - Lihat network tab di DevTools untuk error response
+
+Q4: Database error saat update status
+A:  - Pastikan ALTER TABLE sudah dijalankan
+    - Verifikasi kolom bukti_pembayaran dan allowedFields di Model
+    - Check writable/logs/ untuk detail error
+
+Q5: Merchant tidak bisa lihat dashboard pesanan
+A:  - Pastikan user login dengan role 'merchant'
+    - Check session variable 'role'
+    - Verifikasi route GET /pesanan/dashboardMerchant ada
+
+Q6: Bagaimana kalau ingin ubah limit ukuran file?
+A:  - Edit constant di Controller: $maxSize = 2097152 (2MB)
+    - Update frontend validation di View
+    - Update pesan error di frontend
+
+Q7: Bagaimana kalau ingin ubah informasi rekening bank?
+A:  - Edit hardcoded value di v_detail_pesanan.php (line 300-330)
+    - Atau move ke database table untuk lebih flexible
+    - Atau pindah ke env variable
+
+================================================================================
+10. TIPS UNTUK ENHANCEMENT (FUTURE)
+================================================================================
+
+Rekomendasi improvement di masa depan:
+
+1. SETTINGS DINAMIS
+   - Buat table 'settings' untuk menyimpan bank info
+   - Admin bisa update dari panel admin
+   - Tidak perlu edit hardcode
+
+2. NOTIFICATION SYSTEM
+   - Send email ke pelanggan saat pembayaran disetujui/ditolak
+   - Send notification ke merchant saat ada upload bukti baru
+   - Use queue untuk async notification
+
+3. WATERMARK & ANTI-FRAUD
+   - Add watermark ke bukti pembayaran saat upload
+   - Detect duplicate bukti (prevent same image reused)
+   - Manual flag untuk suspicious uploads
+
+4. AUDIT LOG
+   - Log semua aksi: approve, reject, upload
+   - Siapa yang approve, kapan, dengan reason apa
+   - For accountability dan dispute resolution
+
+5. AUTO-EXPIRE
+   - Auto-reject pembayaran jika tidak diverifikasi dalam 24 jam
+   - Send reminder notification
+   - Reduce customer confusion
+
+6. PAYMENT GATEWAY INTEGRATION
+   - Integrate dengan Midtrans/Xendit untuk auto-verify
+   - Real-time confirmation dari bank
+   - Reduce manual verification load
+
+7. ANALYTICS DASHBOARD
+   - Track conversion rate: order -> payment verified
+   - Track average verification time
+   - Identify bottlenecks
+
+8. EXPORT & REPORTING
+   - Export daftar pesanan dengan bukti ke PDF/Excel
+   - Generate laporan harian/bulanan
+   - For reconciliation dengan bank
+
+================================================================================
+11. SUPPORT & MAINTENANCE
+================================================================================
+
+Jika ada issue atau pertanyaan:
+1. Cek file log: writable/logs/
+2. Enable debugging: ENVIRONMENT=development di .env
+3. Check browser console untuk JS errors
+4. Verify database dengan:
+   - SELECT * FROM pesanan WHERE metode_pembayaran = 'Transfer Bank'
+   - Check kolom bukti_pembayaran dan status_pesanan
+
+================================================================================
+SELESAI! Fitur pembayaran transfer bank manual sudah siap digunakan. 🎉
+================================================================================

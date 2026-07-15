@@ -1,0 +1,256 @@
+ERROR - 2026-07-13 09:26:53 --> Can't create table `kuliner_kampus`.`pesanan` (errno: 150 "Foreign key constraint is incorrectly formed")
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('CREATE TABLE `pesanan` (
+	`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`kode_invoice` VARCHAR(50) NOT NULL UNIQUE,
+	`user_id` INT(11) UNSIGNED NOT NULL,
+	`kuliner_id` INT(11) UNSIGNED NOT NULL,
+	`total_bayar` BIGINT(20) NOT NULL DEFAULT 0,
+	`metode_pembayaran` VARCHAR(50) NULL,
+	`status_pesanan` ENUM(\'pending\',\'process\',\'completed\',\'cancelled\') NOT NULL DEFAULT \'pending\',
+	`created_at` DATETIME NULL,
+	`updated_at` DATETIME NULL,
+	CONSTRAINT `pk_pesanan` PRIMARY KEY(`id`),
+	CONSTRAINT `pesanan_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT `pesanan_kuliner_id_foreign` FOREIGN KEY (`kuliner_id`) REFERENCES `kuliner`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(910): CodeIgniter\Database\MySQLi\Connection->execute('CREATE TABLE `pesanan` (
+	`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`kode_invoice` VARCHAR(50) NOT NULL UNIQUE,
+	`user_id` INT(11) UNSIGNED NOT NULL,
+	`kuliner_id` INT(11) UNSIGNED NOT NULL,
+	`total_bayar` BIGINT(20) NOT NULL DEFAULT 0,
+	`metode_pembayaran` VARCHAR(50) NULL,
+	`status_pesanan` ENUM(\'pending\',\'process\',\'completed\',\'cancelled\') NOT NULL DEFAULT \'pending\',
+	`created_at` DATETIME NULL,
+	`updated_at` DATETIME NULL,
+	CONSTRAINT `pk_pesanan` PRIMARY KEY(`id`),
+	CONSTRAINT `pesanan_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT `pesanan_kuliner_id_foreign` FOREIGN KEY (`kuliner_id`) REFERENCES `kuliner`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci')
+ 3 SYSTEMPATH\Database\BaseConnection.php(827): CodeIgniter\Database\BaseConnection->simpleQuery('CREATE TABLE `pesanan` (
+	`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`kode_invoice` VARCHAR(50) NOT NULL UNIQUE,
+	`user_id` INT(11) UNSIGNED NOT NULL,
+	`kuliner_id` INT(11) UNSIGNED NOT NULL,
+	`total_bayar` BIGINT(20) NOT NULL DEFAULT 0,
+	`metode_pembayaran` VARCHAR(50) NULL,
+	`status_pesanan` ENUM(\'pending\',\'process\',\'completed\',\'cancelled\') NOT NULL DEFAULT \'pending\',
+	`created_at` DATETIME NULL,
+	`updated_at` DATETIME NULL,
+	CONSTRAINT `pk_pesanan` PRIMARY KEY(`id`),
+	CONSTRAINT `pesanan_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT `pesanan_kuliner_id_foreign` FOREIGN KEY (`kuliner_id`) REFERENCES `kuliner`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci')
+ 4 SYSTEMPATH\Database\Forge.php(570): CodeIgniter\Database\BaseConnection->query('CREATE TABLE `pesanan` (
+	`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`kode_invoice` VARCHAR(50) NOT NULL UNIQUE,
+	`user_id` INT(11) UNSIGNED NOT NULL,
+	`kuliner_id` INT(11) UNSIGNED NOT NULL,
+	`total_bayar` BIGINT(20) NOT NULL DEFAULT 0,
+	`metode_pembayaran` VARCHAR(50) NULL,
+	`status_pesanan` ENUM(\'pending\',\'process\',\'completed\',\'cancelled\') NOT NULL DEFAULT \'pending\',
+	`created_at` DATETIME NULL,
+	`updated_at` DATETIME NULL,
+	CONSTRAINT `pk_pesanan` PRIMARY KEY(`id`),
+	CONSTRAINT `pesanan_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT `pesanan_kuliner_id_foreign` FOREIGN KEY (`kuliner_id`) REFERENCES `kuliner`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci')
+ 5 APPPATH\Database\Migrations\2026-07-13-092514_UpdateTablesPesanan.php(62): CodeIgniter\Database\Forge->createTable('pesanan')
+ 6 SYSTEMPATH\Database\MigrationRunner.php(1014): App\Database\Migrations\UpdateTablesPesanan->up()
+ 7 SYSTEMPATH\Database\MigrationRunner.php(202): CodeIgniter\Database\MigrationRunner->migrate('up', Object(stdClass))
+ 8 SYSTEMPATH\Commands\Database\Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest(null)
+ 9 SYSTEMPATH\CLI\SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+10 SYSTEMPATH\Commands\Database\Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked(Object(Closure))
+11 SYSTEMPATH\CLI\Commands.php(74): CodeIgniter\Commands\Database\Migrate->run([])
+12 SYSTEMPATH\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('migrate', [])
+13 SYSTEMPATH\Boot.php(442): CodeIgniter\CLI\Console->run()
+14 SYSTEMPATH\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+15 ROOTPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+DEBUG - 2026-07-13 13:54:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:54:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:54:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:54:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:54:33 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:55:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:55:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:56:18 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:56:19 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:56:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:56:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:57:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2026-07-13 13:57:17 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "layout/navbar.php"
+[Method: GET, Route: pesanan/daftar]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(228): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('layout/navbar.php')
+ 2 SYSTEMPATH\View\View.php(489): CodeIgniter\View\View->render('layout/navbar', null, true)
+ 3 APPPATH\Views\v_daftar_pesanan.php(38): CodeIgniter\View\View->include('layout/navbar')
+ 4 SYSTEMPATH\View\View.php(240): include('C:\\xampp\\htdocs\\Kuliner Kampus\\app\\Views\\v_daftar_pesanan.php')
+ 5 SYSTEMPATH\View\View.php(243): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 6 SYSTEMPATH\Common.php(1250): CodeIgniter\View\View->render('v_daftar_pesanan', [], true)
+ 7 APPPATH\Controllers\Pesanan.php(287): view('v_daftar_pesanan', [...])
+ 8 SYSTEMPATH\CodeIgniter.php(951): App\Controllers\Pesanan->daftar()
+ 9 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Pesanan))
+10 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+14 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\Kuliner Kampus\\public\\index.php')
+DEBUG - 2026-07-13 13:57:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:57:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:57:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:58:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 13:59:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2026-07-13 13:59:13 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "layout/navbar.php"
+[Method: GET, Route: pesanan/daftar]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(228): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('layout/navbar.php')
+ 2 SYSTEMPATH\View\View.php(489): CodeIgniter\View\View->render('layout/navbar', null, true)
+ 3 APPPATH\Views\v_daftar_pesanan.php(38): CodeIgniter\View\View->include('layout/navbar')
+ 4 SYSTEMPATH\View\View.php(240): include('C:\\xampp\\htdocs\\Kuliner Kampus\\app\\Views\\v_daftar_pesanan.php')
+ 5 SYSTEMPATH\View\View.php(243): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 6 SYSTEMPATH\Common.php(1250): CodeIgniter\View\View->render('v_daftar_pesanan', [], true)
+ 7 APPPATH\Controllers\Pesanan.php(287): view('v_daftar_pesanan', [...])
+ 8 SYSTEMPATH\CodeIgniter.php(951): App\Controllers\Pesanan->daftar()
+ 9 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Pesanan))
+10 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+14 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\Kuliner Kampus\\public\\index.php')
+DEBUG - 2026-07-13 14:08:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 14:08:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 14:08:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 14:08:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 14:08:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 14:08:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 14:47:51 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-07-13 14:47:51 --> Unknown column 'users.nomor_hp' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('SELECT `pesanan`.*, `users`.`nama` as `nama_pemesan`, `users`.`nomor_hp`
+FROM `pesanan`
+LEFT JOIN `users` ON `users`.`id` = `pesanan`.`user_id`
+ORDER BY `pesanan`.`created_at` DESC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(910): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `pesanan`.*, `users`.`nama` as `nama_pemesan`, `users`.`nomor_hp`
+FROM `pesanan`
+LEFT JOIN `users` ON `users`.`id` = `pesanan`.`user_id`
+ORDER BY `pesanan`.`created_at` DESC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(827): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `pesanan`.*, `users`.`nama` as `nama_pemesan`, `users`.`nomor_hp`
+FROM `pesanan`
+LEFT JOIN `users` ON `users`.`id` = `pesanan`.`user_id`
+ORDER BY `pesanan`.`created_at` DESC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `pesanan`.*, `users`.`nama` as `nama_pemesan`, `users`.`nomor_hp`
+FROM `pesanan`
+LEFT JOIN `users` ON `users`.`id` = `pesanan`.`user_id`
+ORDER BY `pesanan`.`created_at` DESC', [], false)
+ 5 SYSTEMPATH\Model.php(253): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH\BaseModel.php(676): CodeIgniter\Model->doFindAll(0, 0)
+ 7 APPPATH\Controllers\Pesanan.php(591): CodeIgniter\BaseModel->findAll()
+ 8 SYSTEMPATH\CodeIgniter.php(951): App\Controllers\Pesanan->dashboardMerchant()
+ 9 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Pesanan))
+10 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+14 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\Kuliner Kampus\\public\\index.php')
+CRITICAL - 2026-07-13 14:47:51 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'users.nomor_hp' in 'field list'
+[Method: GET, Route: pesanan/dashboard]
+in SYSTEMPATH\Database\BaseConnection.php on line 865.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `pesanan`.*, `users`.`nama` as `nama_pemesan`, `users`.`nomor_hp`
+FROM `pesanan`
+LEFT JOIN `users` ON `users`.`id` = `pesanan`.`user_id`
+ORDER BY `pesanan`.`created_at` DESC', [], false)
+ 2 SYSTEMPATH\Model.php(253): CodeIgniter\Database\BaseBuilder->get()
+ 3 SYSTEMPATH\BaseModel.php(676): CodeIgniter\Model->doFindAll(0, 0)
+ 4 APPPATH\Controllers\Pesanan.php(591): CodeIgniter\BaseModel->findAll()
+ 5 SYSTEMPATH\CodeIgniter.php(951): App\Controllers\Pesanan->dashboardMerchant()
+ 6 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Pesanan))
+ 7 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+11 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\Kuliner Kampus\\public\\index.php')
+CRITICAL - 2026-07-13 14:47:51 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'users.nomor_hp' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 310.
+ 1 SYSTEMPATH\Database\BaseConnection.php(910): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `pesanan`.*, `users`.`nama` as `nama_pemesan`, `users`.`nomor_hp`
+FROM `pesanan`
+LEFT JOIN `users` ON `users`.`id` = `pesanan`.`user_id`
+ORDER BY `pesanan`.`created_at` DESC')
+ 2 SYSTEMPATH\Database\BaseConnection.php(827): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `pesanan`.*, `users`.`nama` as `nama_pemesan`, `users`.`nomor_hp`
+FROM `pesanan`
+LEFT JOIN `users` ON `users`.`id` = `pesanan`.`user_id`
+ORDER BY `pesanan`.`created_at` DESC')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `pesanan`.*, `users`.`nama` as `nama_pemesan`, `users`.`nomor_hp`
+FROM `pesanan`
+LEFT JOIN `users` ON `users`.`id` = `pesanan`.`user_id`
+ORDER BY `pesanan`.`created_at` DESC', [], false)
+ 4 SYSTEMPATH\Model.php(253): CodeIgniter\Database\BaseBuilder->get()
+ 5 SYSTEMPATH\BaseModel.php(676): CodeIgniter\Model->doFindAll(0, 0)
+ 6 APPPATH\Controllers\Pesanan.php(591): CodeIgniter\BaseModel->findAll()
+ 7 SYSTEMPATH\CodeIgniter.php(951): App\Controllers\Pesanan->dashboardMerchant()
+ 8 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Pesanan))
+ 9 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+13 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\Kuliner Kampus\\public\\index.php')
+CRITICAL - 2026-07-13 14:47:51 --> [Caused by] mysqli_sql_exception: Unknown column 'users.nomor_hp' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('SELECT `pesanan`.*, `users`.`nama` as `nama_pemesan`, `users`.`nomor_hp`
+FROM `pesanan`
+LEFT JOIN `users` ON `users`.`id` = `pesanan`.`user_id`
+ORDER BY `pesanan`.`created_at` DESC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(910): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `pesanan`.*, `users`.`nama` as `nama_pemesan`, `users`.`nomor_hp`
+FROM `pesanan`
+LEFT JOIN `users` ON `users`.`id` = `pesanan`.`user_id`
+ORDER BY `pesanan`.`created_at` DESC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(827): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `pesanan`.*, `users`.`nama` as `nama_pemesan`, `users`.`nomor_hp`
+FROM `pesanan`
+LEFT JOIN `users` ON `users`.`id` = `pesanan`.`user_id`
+ORDER BY `pesanan`.`created_at` DESC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `pesanan`.*, `users`.`nama` as `nama_pemesan`, `users`.`nomor_hp`
+FROM `pesanan`
+LEFT JOIN `users` ON `users`.`id` = `pesanan`.`user_id`
+ORDER BY `pesanan`.`created_at` DESC', [], false)
+ 5 SYSTEMPATH\Model.php(253): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH\BaseModel.php(676): CodeIgniter\Model->doFindAll(0, 0)
+ 7 APPPATH\Controllers\Pesanan.php(591): CodeIgniter\BaseModel->findAll()
+ 8 SYSTEMPATH\CodeIgniter.php(951): App\Controllers\Pesanan->dashboardMerchant()
+ 9 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Pesanan))
+10 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+14 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\Kuliner Kampus\\public\\index.php')
+DEBUG - 2026-07-13 14:52:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 16:00:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 16:00:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 16:00:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 16:00:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 16:00:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 16:00:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 16:01:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+WARNING - 2026-07-13 16:01:34 --> [DEPRECATED] json_decode(): Passing null to parameter #1 ($json) of type string is deprecated in APPPATH\Controllers\Pesanan.php on line 29.
+ 1 APPPATH\Controllers\Pesanan.php(29): json_decode(null, true)
+ 2 SYSTEMPATH\CodeIgniter.php(951): App\Controllers\Pesanan->simpan()
+ 3 SYSTEMPATH\CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Pesanan))
+ 4 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\Kuliner Kampus\\public\\index.php')
+DEBUG - 2026-07-13 16:01:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2026-07-13 16:02:43 --> CodeIgniter\HTTP\Exceptions\BadRequestException: The URI you submitted has disallowed characters: "[ID_PESANAN])"
+[Method: GET, Route: pesanan/detail/%5BID_PESANAN%5D%29]
+in SYSTEMPATH\Router\Router.php on line 768.
+ 1 SYSTEMPATH\Router\Router.php(219): CodeIgniter\Router\Router->checkDisallowedChars('pesanan/detail/[ID_PESANAN])')
+ 2 SYSTEMPATH\CodeIgniter.php(829): CodeIgniter\Router\Router->handle('pesanan/detail/[ID_PESANAN])')
+ 3 SYSTEMPATH\CodeIgniter.php(441): CodeIgniter\CodeIgniter->tryToRouteIt(Object(CodeIgniter\Router\RouteCollection))
+ 4 SYSTEMPATH\CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 8 SYSTEMPATH\rewrite.php(44): require_once('C:\\xampp\\htdocs\\Kuliner Kampus\\public\\index.php')
+DEBUG - 2026-07-13 16:06:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 16:06:18 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-07-13 16:06:19 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
