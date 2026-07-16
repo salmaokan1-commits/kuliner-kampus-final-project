@@ -1053,7 +1053,15 @@
     </div>
     <div class="nav-right">
         <span>Halo, <strong><?= isset($nama_user) ? $nama_user : (session()->get('nama') ?? 'Tamu') ?></strong> (<strong style="color: #d45106;"><?= ucfirst(session()->get('role') ?? 'User') ?></strong>)</span>
-        <a href="#" class="btn-dasbor">Dasbor</a>
+        <?php 
+            $dasbor_link = '#';
+            if (session()->get('role') === 'merchant') {
+                $dasbor_link = base_url('pesanan/dashboard');
+            } elseif (session()->get('role') === 'user') {
+                $dasbor_link = base_url('pesanan/daftar');
+            }
+        ?>
+        <a href="<?= $dasbor_link ?>" class="btn-dasbor">Dasbor</a>
         <a href="<?= base_url('logout') ?>" class="btn-keluar" style="text-decoration:none; color: #666;">Keluar</a>
     </div>
 </header>
@@ -1850,7 +1858,7 @@
                     | <span style="color: #666; font-weight: normal;">${tempat.kategori}</span>
                 </p>
                 <p style="font-size: 10px; color: #888; line-height: 1.2;">${tempat.alamat_lengkap.substring(0, 60)}...</p>
-                <button onclick='bukaModalPesan(${JSON.stringify(tempat)})' style="width: 100%; padding: 6px; margin-top: 6px; background: var(--primary-orange); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">Pesan</button>
+               <button onclick="bukaModalPesan('${tempat.id}')" style="width: 100%; padding: 6px; margin-top: 6px; background: var(--primary-orange); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">Pesan</button>
             </div>
         `;
         list.insertBefore(card, list.firstChild);
@@ -2086,52 +2094,83 @@
     let orderItems = [];
     let selectedKuliner = null;
 
-    function populateMenuOptions(kategori) {
-        const select = document.getElementById('menu_pesanan');
-        select.innerHTML = '<option value="">-- Pilih Menu --</option>';
-        const options = menuOptions[kategori] || [];
-
-        options.forEach(option => {
-            const el = document.createElement('option');
-            el.value = option.name;
-            el.dataset.price = option.price;
-            el.textContent = `${option.name} - ${formatRupiah(option.price)}`;
-            select.appendChild(el);
-        });
-
-        renderOrderItems();
+   function populateMenuOptions(kategori) {
+    const select = document.getElementById('menu_pesanan');
+    select.innerHTML = '<option value="">-- Pilih Menu --</option>';
+    
+    // Normalisasi kategori menjadi huruf kecil agar pencocokan lebih akurat
+    const katKey = kategori ? kategori.trim().toLowerCase() : '';
+    
+    // Cari daftar menu berdasarkan kategori (tidak sensitif huruf besar/kecil)
+    let options = [];
+    for (let key in menuOptions) {
+        if (key.toLowerCase() === katKey) {
+            options = menuOptions[key];
+            break;
+        }
     }
+    
+    // Jika masih tidak ketemu, gunakan fallback data langsung
+    if (options.length === 0) {
+        options = menuOptions[kategori] || [];
+    }
+
+    // Masukkan data menu ke dalam dropdown
+    options.forEach(option => {
+        const el = document.createElement('option');
+        el.value = option.name;
+        el.dataset.price = option.price;
+        el.textContent = `${option.name} - ${formatRupiah(option.price)}`;
+        select.appendChild(el);
+    });
+
+    renderOrderItems();
+}
 
     function addMenuItem() {
-        const select = document.getElementById('menu_pesanan');
-        const menuName = select.value;
-        const selectedOption = select.selectedOptions[0];
-        const quantity = Number(document.getElementById('jumlah').value) || 1;
-
-        if (!menuName) {
-            alert('Silakan pilih menu terlebih dahulu.');
-            return;
-        }
-
-        const price = Number(selectedOption.dataset.price || 0);
-        const existingIndex = orderItems.findIndex(item => item.name === menuName);
-
-        if (existingIndex !== -1) {
-            orderItems[existingIndex].quantity += quantity;
-            orderItems[existingIndex].subtotal = orderItems[existingIndex].quantity * orderItems[existingIndex].price;
-        } else {
-            orderItems.push({
-                name: menuName,
-                quantity: quantity,
-                price: price,
-                subtotal: price * quantity
-            });
-        }
-
-        renderOrderItems();
-        document.getElementById('jumlah').value = 1;
-        select.value = '';
+    const select = document.getElementById('menu_pesanan');
+    const selectedOption = select.options[select.selectedIndex];
+    
+    // 1. Validasi: Pastikan user sudah memilih menu
+    if (!selectedOption || select.value === "") {
+        alert("Silakan pilih menu terlebih dahulu.");
+        return;
     }
+    
+    const menuName = select.value;
+    const price = parseFloat(selectedOption.dataset.price) || 0;
+    const quantity = parseInt(document.getElementById('jumlah').value) || 1;
+    
+    // 2. Validasi: Pastikan jumlah minimal adalah 1
+    if (quantity <= 0) {
+        alert("Jumlah pesanan minimal adalah 1.");
+        return;
+    }
+
+    // 3. Cek apakah menu ini sudah pernah dimasukkan ke keranjang sebelumnya
+    const existingItemIndex = orderItems.findIndex(item => item.name === menuName);
+    
+    if (existingItemIndex > -1) {
+        // Jika sudah ada, cukup tambahkan jumlahnya saja (tidak membuat baris baru)
+        orderItems[existingItemIndex].quantity += quantity;
+        orderItems[existingItemIndex].subtotal = orderItems[existingItemIndex].price * orderItems[existingItemIndex].quantity;
+    } else {
+        // Jika belum ada, masukkan data menu baru ke dalam array orderItems
+        orderItems.push({
+            name: menuName,
+            quantity: quantity,
+            price: price,
+            subtotal: price * quantity
+        });
+    }
+
+    // 4. Render ulang tampilan daftar belanja di modal
+    renderOrderItems();
+    
+    // 5. Reset input jumlah menjadi 1 dan kosongkan pilihan dropdown menu
+    document.getElementById('jumlah').value = 1;
+    select.value = '';
+}
 
     function renderOrderItems() {
         const tbody = document.querySelector('#order-items-table tbody');
@@ -2184,30 +2223,43 @@
         document.getElementById('input_total_qty').value = totalQty;
     }
 
-    function bukaModalPesan(kulinerData) {
-        selectedKuliner = kulinerData;
-        document.getElementById('modalPesan').classList.add('active');
-        document.getElementById('nama-tempat-pesan').textContent = kulinerData.nama_tempat;
-        document.getElementById('alamat-tempat-pesan').textContent = kulinerData.alamat_lengkap;
-        document.getElementById('kategori-pesan').textContent = kulinerData.kategori;
-        document.getElementById('rating-pesan').textContent = kulinerData.rating;
-        document.getElementById('input_id_tempat').value = kulinerData.id || kulinerData.id_tempat || '';
-        document.getElementById('input_nama_tempat').value = kulinerData.nama_tempat;
-        document.getElementById('input_kategori').value = kulinerData.kategori;
-        document.getElementById('input_nama_pemesan').value = '';
-        document.getElementById('input_telepon').value = '';
-        document.getElementById('input_metode_pembayaran').value = '';
-        document.getElementById('nama_pemesan').value = '';
-        document.getElementById('telepon').value = '';
-        document.getElementById('metode_pembayaran').value = '';
-        orderItems = [];
-        document.getElementById('form-pesanan').reset();
-        document.getElementById('meja').value = '';
-        document.getElementById('receipt-section').style.display = 'none';
-        document.getElementById('form-pesanan').style.display = 'block';
-        populateMenuOptions(kulinerData.kategori);
-        renderOrderItems();
+   function bukaModalPesan(kulinerData) {
+    // --- TAMBAHKAN BLOK PENGECEKAN INI DI PALING ATAS ---
+    // Jika yang dikirim adalah ID (berupa text/angka), ambil data asli dari markerData
+    if (typeof kulinerData === 'string' || typeof kulinerData === 'number') {
+        kulinerData = markerData[kulinerData];
     }
+    
+    // Validasi jika data tidak ditemukan
+    if (!kulinerData) {
+        alert('Data tempat kuliner tidak ditemukan.');
+        return;
+    }
+    // ---------------------------------------------------
+
+    selectedKuliner = kulinerData;
+    document.getElementById('modalPesan').classList.add('active');
+    document.getElementById('nama-tempat-pesan').textContent = kulinerData.nama_tempat;
+    document.getElementById('alamat-tempat-pesan').textContent = kulinerData.alamat_lengkap;
+    document.getElementById('kategori-pesan').textContent = kulinerData.kategori;
+    document.getElementById('rating-pesan').textContent = kulinerData.rating;
+    document.getElementById('input_id_tempat').value = kulinerData.id || kulinerData.id_tempat || '';
+    document.getElementById('input_nama_tempat').value = kulinerData.nama_tempat;
+    document.getElementById('input_kategori').value = kulinerData.kategori;
+    document.getElementById('input_nama_pemesan').value = '';
+    document.getElementById('input_telepon').value = '';
+    document.getElementById('input_metode_pembayaran').value = '';
+    document.getElementById('nama_pemesan').value = '';
+    document.getElementById('telepon').value = '';
+    document.getElementById('metode_pembayaran').value = '';
+    orderItems = [];
+    document.getElementById('form-pesanan').reset();
+    document.getElementById('meja').value = '';
+    document.getElementById('receipt-section').style.display = 'none';
+    document.getElementById('form-pesanan').style.display = 'block';
+    populateMenuOptions(kulinerData.kategori);
+    renderOrderItems();
+}
 
     function submitPesanan(event) {
         event.preventDefault();

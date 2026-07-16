@@ -1,61 +1,156 @@
-# CodeIgniter 4 Framework
+# Kuliner Kampus
 
-## What is CodeIgniter?
+Kuliner Kampus adalah aplikasi pemesanan makanan berbasis **CodeIgniter 4**. Aplikasi ini mendukung fitur login, role pengguna, pengelolaan tempat kuliner/menu, pemesanan, upload bukti pembayaran transfer bank, serta verifikasi pembayaran oleh merchant.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+## Kebutuhan Sistem
 
-This repository holds the distributable version of the framework.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+Pastikan perangkat sudah memiliki:
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+- PHP 8.1 atau lebih baru
+- Composer
+- MySQL/MariaDB
+- Web server seperti Apache/XAMPP
+- Ekstensi PHP umum CodeIgniter 4:
+  - `intl`
+  - `mbstring`
+  - `json`
+  - `mysqli` atau `mysqlnd`
+  - `curl`
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+## Cara Instalasi
 
-## Important Change with index.php
+1. Clone atau salin project ke folder web server.
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+   Contoh jika menggunakan XAMPP:
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+   ```bash
+   C:\xampp\htdocs\Kuliner Kampus
+   ```
 
-**Please** read the user guide for a better explanation of how CI4 works!
+2. Masuk ke folder project.
 
-## Repository Management
+   ```bash
+   cd "C:\xampp\htdocs\Kuliner Kampus"
+   ```
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+3. Install dependency menggunakan Composer.
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+   ```bash
+   composer install
+   ```
 
-## Contributing
+4. Buat database baru di MySQL/phpMyAdmin.
 
-We welcome contributions from the community.
+   Contoh nama database:
 
-Please read the [*Contributing to CodeIgniter*](https://github.com/codeigniter4/CodeIgniter4/blob/develop/CONTRIBUTING.md) section in the development repository.
+   ```text
+   kuliner_kampus
+   ```
 
-## Server Requirements
+5. Salin file `env` menjadi `.env` jika belum ada.
 
-PHP version 8.2 or higher is required, with the following extensions installed:
+   ```bash
+   copy env .env
+   ```
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+   Jika menggunakan terminal Git Bash/Linux/macOS:
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - The end of life date for PHP 8.1 was December 31, 2025.
-> - If you are still using below PHP 8.2, you should upgrade immediately.
-> - The end of life date for PHP 8.2 will be December 31, 2026.
+   ```bash
+   cp env .env
+   ```
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+6. Atur konfigurasi database pada file `.env`.
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+7. Jalankan migration database.
+
+   ```bash
+   php spark migrate
+   ```
+
+8. Jika project memiliki data SQL/dummy tambahan, import data tersebut melalui phpMyAdmin atau jalankan seeder jika tersedia.
+
+9. Jalankan project.
+
+   ```bash
+   php spark serve
+   ```
+
+10. Buka aplikasi melalui browser.
+
+   ```text
+   http://localhost:8080
+   ```
+
+   Jika menggunakan XAMPP tanpa `php spark serve`, arahkan browser ke folder `public` atau sesuaikan virtual host Apache agar document root mengarah ke:
+
+   ```text
+   C:\xampp\htdocs\Kuliner Kampus\public
+   ```
+
+## Konfigurasi `.env`
+
+Pastikan file `.env` berada di root project. Minimal konfigurasi yang perlu disesuaikan:
+
+```env
+CI_ENVIRONMENT = development
+
+app.baseURL = 'http://localhost:8080/'
+
+# Database
+database.default.hostname = localhost
+database.default.database = kuliner_kampus
+database.default.username = root
+database.default.password =
+database.default.DBDriver = MySQLi
+database.default.DBPrefix =
+database.default.port = 3306
+```
+
+Jika menggunakan XAMPP default, biasanya username database adalah `root` dan password dikosongkan.
+
+Jika menjalankan project melalui Apache/XAMPP dengan URL berbeda, ubah `app.baseURL` sesuai alamat project, misalnya:
+
+```env
+app.baseURL = 'http://localhost/Kuliner%20Kampus/public/'
+```
+
+## Akun Demo
+
+Gunakan akun berikut untuk mencoba fitur aplikasi.
+
+| Role | Username/Login | Password | Keterangan |
+|---|---|---|---|
+| Merchant | `djava resto` | `djavaresto123` | Digunakan untuk mengelola kuliner/menu dan verifikasi pembayaran. |
+| User/Pelanggan | `pelanggan` | `pelanggan123` | Digunakan untuk memesan makanan dan upload bukti pembayaran. |
+
+> Catatan: Jika login menggunakan email, gunakan email yang sesuai dengan data pada database. Jika akun demo belum tersedia setelah instalasi, tambahkan akun tersebut melalui fitur daftar akun atau insert langsung ke tabel `users` dengan password yang sudah di-hash.
+
+## Fitur Utama
+
+- Login dan registrasi pengguna
+- Role pengguna seperti merchant dan pelanggan
+- Pengelolaan tempat kuliner
+- Pengelolaan menu makanan
+- Pemesanan makanan
+- Detail pesanan dan invoice
+- Upload bukti pembayaran transfer bank
+- Dashboard merchant untuk verifikasi pembayaran
+- Persetujuan atau penolakan pembayaran
+- Countdown timer batas waktu pembayaran
+
+## Struktur Project Penting
+
+| Path | Fungsi |
+|---|---|
+| `app/Controllers` | Berisi controller utama seperti `Auth`, `Kuliner`, `Menu`, `Pesanan`, dan `Transaksi`. |
+| `app/Models` | Berisi model database seperti `UserModel`, `KulinerModel`, `MenuModel`, dan `PesananModel`. |
+| `app/Views` | Berisi halaman tampilan aplikasi. |
+| `app/Database/Migrations` | Berisi file migration untuk struktur database. |
+| `app/Config/Routes.php` | Berisi konfigurasi route aplikasi. |
+| `public/uploads` | Folder penyimpanan file upload seperti bukti pembayaran. |
+
+## Catatan Pengembangan
+
+- Pastikan folder `writable` dan folder upload di dalam `public/uploads` dapat ditulis oleh server.
+- Jangan gunakan konfigurasi `.env` development untuk server produksi.
+- Untuk produksi, arahkan document root web server ke folder `public` agar file internal CodeIgniter tidak terekspos.

@@ -13,6 +13,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="<?= csrf_token() ?>" content="<?= csrf_hash() ?>">
     <title>Dashboard Merchant - Verifikasi Pembayaran</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -266,16 +267,74 @@ function closeBuktiModal() {
     currentPesananId = null;
 }
 
+function getCsrfHeaders() {
+    const csrfMeta = document.querySelector('meta[name="<?= csrf_token() ?>"]');
+    const csrfName = csrfMeta ? csrfMeta.getAttribute('name') : '';
+    const csrfHash = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+    return {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json',
+        [csrfName]: csrfHash
+    };
+}
+
 function approvePayment(id) {
     if (!confirm('Setujui pembayaran invoice ini?')) return;
-    fetch('/pesanan/approvePayment/' + id, { method: 'POST' })
-    .then(res => res.json()).then(data => { if(data.success){ location.reload(); }else{ alert(data.message); } });
+
+    fetch(`<?= base_url('pesanan/approvePayment/') ?>${id}`, {
+        method: 'POST',
+        headers: getCsrfHeaders()
+    })
+    .then(async res => {
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+            const message = data.message || `Gagal menyetujui pembayaran. Status: ${res.status}`;
+            console.error('Approve payment error:', { status: res.status, data });
+            alert(message);
+            return;
+        }
+
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'Gagal menyetujui pembayaran.');
+        }
+    })
+    .catch(error => {
+        console.error('Approve payment request failed:', error);
+        alert('Terjadi kesalahan saat menyetujui pembayaran. Silakan cek console untuk detail.');
+    });
 }
 
 function rejectPayment(id) {
     if (!confirm('Tolak bukti pembayaran ini?')) return;
-    fetch('/pesanan/rejectPayment/' + id, { method: 'POST' })
-    .then(res => res.json()).then(data => { if(data.success){ location.reload(); }else{ alert(data.message); } });
+
+    fetch(`<?= base_url('pesanan/rejectPayment/') ?>${id}`, {
+        method: 'POST',
+        headers: getCsrfHeaders()
+    })
+    .then(async res => {
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+            const message = data.message || `Gagal menolak pembayaran. Status: ${res.status}`;
+            console.error('Reject payment error:', { status: res.status, data });
+            alert(message);
+            return;
+        }
+
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'Gagal menolak pembayaran.');
+        }
+    })
+    .catch(error => {
+        console.error('Reject payment request failed:', error);
+        alert('Terjadi kesalahan saat menolak pembayaran. Silakan cek console untuk detail.');
+    });
 }
 
 function approvePaymentFromModal() { if(currentPesananId) approvePayment(currentPesananId); }

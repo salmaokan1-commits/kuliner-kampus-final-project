@@ -131,6 +131,11 @@
 
         <!-- METODE PEMBAYARAN & FORM UPLOAD BUKTI -->
         <?php if (strtolower($pesanan['metode_pembayaran']) === 'transfer bank'): ?>
+            <?php if (in_array(strtolower($pesanan['status_pesanan']), ['pending', 'menunggu konfirmasi'])): ?>
+                <div class="alert alert-warning text-center shadow-sm">
+                    ⏳ Sisa Waktu Pembayaran Anda: <span id="countdown-timer" class="fw-bold fs-5 text-danger">Menghitung...</span>
+                </div>
+            <?php endif; ?>
 
             <!-- INFORMASI REKENING BANK -->
             <div class="bank-account-box">
@@ -264,6 +269,47 @@ document.getElementById('formUploadBukti')?.addEventListener('submit', function(
         if (data.success) { alert('✅ ' + data.message); window.location.reload(); } else { alert('❌ Error: ' + data.message); }
     })
     .catch(error => { loadingSpinner.style.display = 'none'; submitBtn.disabled = false; alert('❌ Terjadi kesalahan: ' + error); });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const countdownTimer = document.getElementById('countdown-timer');
+    if (!countdownTimer) return;
+
+    const orderTime = new Date("<?= date('Y-m-d\TH:i:s', strtotime($pesanan['created_at'])) ?>").getTime();
+    const deadline = orderTime + (60 * 60 * 1000);
+
+    const countdownInterval = setInterval(function() {
+        const now = new Date().getTime();
+        const distance = deadline - now;
+
+        if (distance <= 0) {
+            clearInterval(countdownInterval);
+            countdownTimer.textContent = 'WAKTU HABIS!';
+
+            const timerAlert = countdownTimer.closest('.alert');
+            if (timerAlert) {
+                timerAlert.classList.remove('alert-warning');
+                timerAlert.classList.add('alert-danger');
+            }
+
+            const uploadForm = document.getElementById('formUploadBukti');
+            const submitButton = document.getElementById('submitBtn');
+            if (uploadForm) uploadForm.style.display = 'none';
+            if (submitButton) submitButton.style.display = 'none';
+
+            setTimeout(function() {
+                window.location.reload();
+            }, 3000);
+
+            return;
+        }
+
+        const minutes = Math.floor(distance / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        countdownTimer.textContent = `${String(minutes).padStart(2, '0')} Menit ${String(seconds).padStart(2, '0')} Detik`;
+    }, 1000);
 });
 </script>
 </body>

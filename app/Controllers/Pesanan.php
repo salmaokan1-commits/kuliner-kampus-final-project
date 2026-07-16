@@ -24,9 +24,21 @@ public function simpan()
         $menuModel = new MenuModel();
         $detailModel = new PesananDetailModel();
 
-        // Mengambil data item dari POST (JSON string dari view belanjaanmu)
-        $menuPesananRaw = $this->request->getPost('menu_pesanan');
-        $menuItems = json_decode($menuPesananRaw, true);
+        // Mengambil data item dari POST atau JSON payload
+        $isJson = $this->request->isAJAX() || strpos($this->request->getHeaderLine('Content-Type'), 'application/json') !== false;
+        
+        if ($isJson) {
+            $jsonData = $this->request->getJSON(true) ?? [];
+            $menuPesananRaw = $jsonData['menu_pesanan'] ?? '';
+            $id_tempat = $jsonData['id_tempat'] ?? '';
+            $metode_pembayaran = $jsonData['metode_pembayaran'] ?? '';
+        } else {
+            $menuPesananRaw = $this->request->getPost('menu_pesanan');
+            $id_tempat = $this->request->getPost('id_tempat');
+            $metode_pembayaran = $this->request->getPost('metode_pembayaran');
+        }
+
+        $menuItems = is_string($menuPesananRaw) ? json_decode($menuPesananRaw, true) : $menuPesananRaw;
 
         if (!is_array($menuItems) || empty($menuItems)) {
             return $this->response->setJSON([
@@ -47,8 +59,8 @@ public function simpan()
             if (isset($item['id']) && is_numeric($item['id'])) {
                 $menuId = (int) $item['id'];
                 $menu = $menuModel->find($menuId);
-            } elseif (!empty($this->request->getPost('id_tempat')) && isset($item['name'])) {
-                $kulinerId = (int) $this->request->getPost('id_tempat');
+            } elseif (!empty($id_tempat) && isset($item['name'])) {
+                $kulinerId = (int) $id_tempat;
                 $menu = $menuModel->findByNameAndKuliner($item['name'], $kulinerId);
                 $menuId = $menu ? (int) $menu['id'] : 0;
             }
@@ -99,9 +111,9 @@ public function simpan()
             $dataMaster = [
                 'kode_invoice'      => $kodeInvoice,
                 'user_id'           => session()->get('id_user') ?? session()->get('id'),
-                'kuliner_id'        => $this->request->getPost('id_tempat'), // id_tempat bertindak sebagai kuliner_id
+                'kuliner_id'        => $id_tempat, // id_tempat bertindak sebagai kuliner_id
                 'total_bayar'       => max(0, $totalBayar),
-                'metode_pembayaran' => $this->request->getPost('metode_pembayaran'),
+                'metode_pembayaran' => $metode_pembayaran,
                 'status_pesanan'    => 'pending', // Status awal di set 'pending' sesuai ENUM migration
             ];
 
